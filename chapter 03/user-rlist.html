@@ -88,6 +88,7 @@
         <!-- users에 등록된 사람이 없을 경우  -->
         <p v-if="users.length===0 ">등록된 사용자가 없습니다</p>
         <!-- 지역 필터링 결과가 없을 경우  -->
+        <!-- 배열.some(콜백) : 배열 내 요소 중 하나라도 true가 반환되면 true-->
         <p
           v-if="users.length>0&&
           !users.some(user => selectRegion === ''||user.region==selectRegion)"
