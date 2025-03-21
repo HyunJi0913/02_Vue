@@ -310,7 +310,9 @@
         computed: {
           sortedUsers() {
             return [...this.users].sort((a, b) => {
-              if (this.sortKey === 'id') return a.id - b.id; //숫자
+              //숫자
+
+              if (this.sortKey === 'id') return a.id - b.id;
               return a[this.sortKey].localeCompare(b[this.sortKey]); // 문자열
             });
           },
