@@ -22,7 +22,7 @@
         text-decoration: line-through;
       }
       .container {
-        padding: 10px 10px 10px 10px;
+        padding: 10px;
       }
       .panel-borderless {
         border: 0;
@@ -36,10 +36,12 @@
   <body>
     <div id="app" class="container">
       <div class="card card-body bg-light">
-        <div classe="title">:: Todolist App</div>
+        <div class="title">:: Todolist App</div>
       </div>
+
       <div class="card card-default card-borderless">
         <div class="card-body">
+          <!-- 입력 영역 -->
           <div class="row mb-3">
             <div class="col">
               <div class="input-group">
@@ -58,25 +60,36 @@
               </div>
             </div>
           </div>
+
+          <!-- 통계 영역 -->
+          <div class="total mb-3">
+            <p>
+              전체 todo 개수: {{ totalTodos }}, 완료 todo 개수: {{
+              completedTodos }}, 미완료 todo 개수: {{ remainingTodos }}
+            </p>
+          </div>
+
+          <!-- 리스트 영역 -->
           <div class="row">
             <div class="col">
               <ul class="list-group">
                 <li
-                  v-for="todoitem in todolist"
+                  v-for="todoitem in sortedTodoList"
                   :key="todoitem.id"
                   class="list-group-item"
-                  :class="{'list-group-item-success':todoitem.completed}"
-                  @click="toggleCompleted(todoitem.id)"
+                  :class="{ 'list-group-item-success': todoitem.completed }"
                 >
-                  <span
-                    class="pointer"
-                    :class="{'todo-done':todoitem.completed}"
-                  >
-                    {{todoitem.todo}} {{todoitem.completed ? "(완료)":""}}
+                  <input
+                    type="checkbox"
+                    class="form-check-input me-2"
+                    v-model="todoitem.completed"
+                  />
+                  <span :class="{ 'todo-done': todoitem.completed }">
+                    {{ todoitem.todo }}
                   </span>
                   <span
                     class="float-end badge bg-secondary pointer"
-                    @click.stop="deleteTodo(todoitem.id)"
+                    @click="deleteTodo(todoitem.id)"
                     >삭제</span
                   >
                 </li>
@@ -86,12 +99,13 @@
         </div>
       </div>
     </div>
-    <script src="https://unpkg.com/vue"></script>
-    <script>
-      // let ts = new Date().getTime();
-      let ts = Date.now();
 
-      let vm = Vue.createApp({
+    <!-- Vue CDN -->
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <script>
+      const ts = Date.now();
+
+      const vm = Vue.createApp({
         name: 'App',
         data() {
           return {
@@ -103,6 +117,25 @@
               { id: ts + 3, todo: 'Vue 원고 집필', completed: false },
             ],
           };
+        },
+        computed: {
+          sortedTodoList() {
+            return this.todolist.slice().sort((a, b) => {
+              if (a.completed !== b.completed) {
+                return a.completed - b.completed;
+              }
+              return a.todo.localeCompare(b.todo);
+            });
+          },
+          totalTodos() {
+            return this.todolist.length;
+          },
+          completedTodos() {
+            return this.todolist.filter((item) => item.completed).length;
+          },
+          remainingTodos() {
+            return this.todolist.filter((item) => !item.completed).length;
+          },
         },
         methods: {
           addTodo() {
@@ -116,12 +149,8 @@
             }
           },
           deleteTodo(id) {
-            let index = this.todolist.findIndex((item) => id === item.id);
+            const index = this.todolist.findIndex((item) => item.id === id);
             this.todolist.splice(index, 1);
-          },
-          toggleCompleted(id) {
-            let index = this.todolist.findIndex((item) => id === item.id);
-            this.todolist[index].completed = !this.todolist[index].completed;
           },
         },
       }).mount('#app');
