@@ -1,47 +1,110 @@
-<script setup>
-import HelloWorld from './components/HelloWorld.vue'
-import TheWelcome from './components/TheWelcome.vue'
-</script>
-
 <template>
-  <header>
-    <img alt="Vue logo" class="logo" src="./assets/logo.svg" width="125" height="125" />
-
-    <div class="wrapper">
-      <HelloWorld msg="You did it!" />
+  <div id="app" class="container-lg">
+    <div class="card card-body bg-light">
+      <div class="title">📆 TodoList App</div>
     </div>
-  </header>
+  </div>
 
-  <main>
-    <TheWelcome />
-  </main>
+  <div class="card card-default card-borderless">
+    <div class="card-body">
+      <!-- 입력용 컴포넌트 방출(add-todo)된 이벤트가 감지 되었을때  
+       addTodo() 메서드 호출 -->
+      <InputTodo @add-todo="addTodo" />
+
+      <!-- 카운트 컴포넌트 -->
+      <TodoCount :todolist="todolist" />
+
+      <!-- 목록 컴포넌트 -->
+      <!-- 목록 화면 렌더링에 필요한 데이터 todolist를 부모 (App.vue)가 가지고 있음
+       부모가 가지고 있는걸 자식에게 전달해야 하므로 (부모->자식) 'Props' 사용 !!  -->
+      <!-- v-bind 이용하여 전달 => v-bind : 전달할이름  -->
+      <TodoList
+        v-bind:todoList="sortedList"
+        @toggle-completed="toggleCompleted"
+        @delete-todo="deleteTodo"
+      />
+    </div>
+  </div>
 </template>
 
-<style scoped>
-header {
-  line-height: 1.5;
-}
+<script>
+// import 태그명 form '경로';
+import InputTodo from './components/InputTodo.vue';
+import TodoList from './components/TodoList.vue';
+import TodoCount from './components/TodoCount.vue';
 
-.logo {
-  display: block;
-  margin: 0 auto 2rem;
-}
+export default {
+  components: { InputTodo, TodoList, TodoCount },
+  data() {
+    return {
+      todolist: [
+        { id: Date.now(), todo: '자전거 타기', completed: false },
+        { id: Date.now() + 1, todo: '딸과 공원 산책', completed: true },
+        {
+          id: Date.now() + 2,
+          todo: '일요일 애견 카페',
+          completed: false,
+        },
+        { id: Date.now() + 3, todo: 'Vue 원고 집필', completed: false },
+      ],
+    };
+  },
+  methods: {
+    /* 할 일 추가 메서드 */
+    // receiveTodo : InputTodo 컴포넌트의 this.$emit('add-todo',this.todo);
+    // 에서 전달된 this.todo
+    addTodo(receiveTodo) {
+      this.todolist.push({
+        id: Date.now(),
+        todo: receiveTodo,
+        completed: false,
+      });
+    },
+    /* 할 일 완료 여부 변경 메서드 */
+    // 매개변수 id : TodoListItem 에서 부터 전달된 id . 끌어. ~ 올려 ~!
+    toggleCompleted(id) {
+      let index = this.todolist.findIndex((item) => id === item.id);
+      this.todolist[index].completed = !this.todolist[index].completed;
+    },
 
-@media (min-width: 1024px) {
-  header {
-    display: flex;
-    place-items: center;
-    padding-right: calc(var(--section-gap) / 2);
-  }
+    /* 할 일 삭제 메서드 */
+    deleteTodo(id) {
+      // 배열.findIndex(콜백함수) : 콜백 함수의 결과가 true인 index를 반환
 
-  .logo {
-    margin: 0 2rem 0 0;
-  }
+      let index = this.todolist.findIndex((item) => id === item.id);
+      this.todolist.splice(index, 1);
+    },
+  },
+  //computed : data가 변할때 자동으로 계산띠
+  //-> 계산되서 return된 값은 함수명 sortedList으로 사용한다
+  computed: {
+    // 정렬
+    sortedList() {
+      this.todolist.sort((t1, t2) => {
+        // true > false  -> 결과 : true
+        if (t1.completed > t2.completed) {
+          return 1; // 양수 반환 시 자리 바뀜 (t1, t2 -> t2, t1)
+        }
 
-  header .wrapper {
-    display: flex;
-    place-items: flex-start;
-    flex-wrap: wrap;
-  }
-}
-</style>
+        if (t1.completed < t2.completed) {
+          return -1; // 음수 반환 시 자리 바꿈 X
+        }
+
+        // 위 if문 실행 X === completed가 같을 경우
+        // -> 문자열 오름 차순 정렬
+
+        // 모두 소문자로 변경(대소문자 구분 X)
+        const todo1 = t1.todo.toLowerCase();
+        const todo2 = t2.todo.toLowerCase();
+
+        if (todo1 > todo2) return 1; // 자리 교체
+        else if (todo1 === todo2) return 0; // 유지
+        else return -1; // 유지
+      });
+
+      // 정렬된 todoList 반환
+      return this.todolist;
+    },
+  },
+};
+</script>
