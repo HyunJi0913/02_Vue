@@ -1,4 +1,1 @@
-//실습 코드 제출 
-git add.
-git commit -m "메시지"  
-git push origin main
+## IT'S YOUR LIFE 02_VUE 실습과제 제출
