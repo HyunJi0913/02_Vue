@@ -92,7 +92,7 @@ const deleteTodo = (id) => {
 const sortedList = computed(() => {
   state.todoList.sort((t1, t2) => {
     if (t1.completed > t2.completed) {
-      return 1; // 양수 반환 시 자리 바뀜 (t1, t2 -> t2, t1)
+      return 1; // 양수 반환 시 자리 바뀜
     }
 
     if (t1.completed < t2.completed) {
